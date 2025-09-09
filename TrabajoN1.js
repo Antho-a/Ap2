@@ -67,7 +67,13 @@ const bloqueTrabajo = function (tareas , ESTADOS, DIFICULTADES){
        }
 
         switch(opcion){
-            case 1:            
+            case 1:
+                crearTareaPorTeclado(function(tarea) {
+                // Aquí recibimos la tarea creada y la agregamos al arreglo
+                tareas.push(tarea);
+                console.log('\nTarea creada:');
+                });
+                bloqueTrabajo(tareas , ESTADOS, DIFICULTADES);            
             break;
 
             case 2:
@@ -154,3 +160,4 @@ main = function (){
 
 
 }
+main();
