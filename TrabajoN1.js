@@ -7,10 +7,34 @@ const rl = readline.createInterface({
 });
 
 function menu(){
-    console.log("1. Crear tarea");
+    console.log("1. Buscar tarea");
     console.log("2. Cambiar estado de una tarea");
-    console.log("3. Buscar tarea");
+    console.log("3. Crear tarea");
     console.log("4. Salir");
+}
+
+function menuBuscar(){
+    console.log("[1] Ver todas las tareas");
+    console.log("[2] Ver tareas pendientes");
+    console.log("[3] Ver tareas en curso");
+    console.log("[4] Ver tareas terminadas");
+    console.log("[5] Ver tareas canceladas");
+    console.log("[6] Volver al menu principal");
+}
+
+function titulosTareas(tareas , estadoEligido) {
+
+    estados = ['todas', 'pendientes', 'en curso', 'terminadas', 'canceladas'];
+
+    console.log("Tareas:");
+    tareas.forEach((tarea, index) => {
+        if(tareas.estado.toLowerCase() == estadoEligido  && estadoEligido != 'todas'){
+        console.log(`[${index + 1}]. ${tarea.titulo} - Estado: ${tarea.estado}`);
+        }
+        else if (estadoEligido == 'todas'){
+            console.log(`[${index + 1}]. ${tarea.titulo} - Estado: ${tarea.estado}`);
+        }
+    });
 }
 
 function buscarTarea(tareas, titulo) {
@@ -34,27 +58,56 @@ function mostrarDetalle(tarea) {
 } 
 
 
-function crearTarea(titulo, opciones = {}) {
-        let ahora = new Date();
-        let tarea = {
-            titulo: titulo,
-            descripcion: opciones.descripcion || '',
-            estado: 'pendiente',
-            fechaCreacion: ahora,
-            vencimiento: opciones.vencimiento || null,
-            dificultad: opciones.dificultad || 1 // 1: fácil, 2: medio, 3: difícil
-        };
-        
-    return tarea;
-} // funcion que se utilizara en el caso 1 
+function crearTareaPorTeclado(titulo,tareas , ESTADOS, DIFICULTADES) {
+    let tarea = {
+        titulo: '',
+        descripcion: '',
+        estado: 'pendiente',
+        fechaCreacion: new Date(),
+        vencimiento: null,
+        dificultad: 1, // 1: fácil, 2: medio, 3: difícil
+        ultimaEdicion: new Date(),
+
+    };
+
+    rl.question('Título de la tarea: ', (titulo) => {
+        if (!titulo.trim()) {
+            console.log("El título no puede estar vacío.");
+            bloqueTrabajo(tareas , ESTADOS, DIFICULTADES);
+            return;
+        }
+        else if (titulo.length > 101) {
+            console.log("El título no puede tener más de 100 caracteres.");
+            bloqueTrabajo(tareas , ESTADOS, DIFICULTADES);
+            return;
+        }
+        tarea.titulo = titulo;
+        rl.question('Descripción (opcional): ', (descripcion) => {
+
+            if(descripcion.length > 501) {
+                console.log("La descripción no puede tener más de 500 caracteres.");
+                bloqueTrabajo(tareas , ESTADOS, DIFICULTADES);
+                return;
+            }
+
+            tarea.descripcion = descripcion;
+
+            tareas.push(tarea);
+            console.log("Tarea creada exitosamente.");
+
+            bloqueTrabajo(tareas , ESTADOS, DIFICULTADES);
+
+        });
+    });
+
+    
+}
 
 
 
 
 
-
-
-const bloqueTrabajo = function (tareas , ESTADOS, DIFICULTADES){
+const bloqueTrabajo = function (tareas, ESTADOS, DIFICULTADES){
 
     menu();
 
@@ -68,16 +121,38 @@ const bloqueTrabajo = function (tareas , ESTADOS, DIFICULTADES){
 
         switch(opcion){
             case 1:
-                crearTareaPorTeclado(function(tarea) {
-                // Aquí recibimos la tarea creada y la agregamos al arreglo
-                tareas.push(tarea);
-                console.log('\nTarea creada:');
+                if(tareas.length === 0){
+                    console.log("No hay tareas para mostrar.");
+                    bloqueTrabajo(tareas , ESTADOS, DIFICULTADES);
+                    break;
+                }
+
+                menuBuscar();
+                rl.question("Ingrese una opcion: ", (opcion) =>{
+                    if (isNaN(opcion)){
+                        console.log("Opcion no valida");
+                        bloqueTrabajo(tareas , ESTADOS, DIFICULTADES);
+                    }
+                    opcion = parseInt(opcion);
+                    if (opcion < 1 || opcion > 6){
+                        console.log("Opcion no valida");
+                        bloqueTrabajo(tareas , ESTADOS, DIFICULTADES);
+                    }
+                    titulosTareas(tareas , estados[opcion - 1]);
                 });
-                bloqueTrabajo(tareas , ESTADOS, DIFICULTADES);            
+                        
             break;
 
             case 2:
-                 rl.question("Ingrese el titulo de la tarea a buscar: ", (titulo) =>{
+                if (tareas.length === 0) {
+                    console.log("No hay tareas para mostrar.");
+                    bloqueTrabajo(tareas , ESTADOS, DIFICULTADES);
+                    break;
+                }
+
+
+
+                rl.question("Ingrese el titulo de la tarea a buscar: ", (titulo) =>{
                     let tarea = buscarTarea(tareas, titulo);    
                     if (tarea) {
                         console.log("\nTarea encontrada:");
@@ -93,23 +168,14 @@ const bloqueTrabajo = function (tareas , ESTADOS, DIFICULTADES){
                         console.log("Tarea no encontrada");
                     }
                 });
+
             break;
 
             case 3:
-                rl.question("Ingrese el titulo de la tarea a buscar: ", (titulo) =>{
-                    let tarea = buscarTarea(tareas, titulo);    
-                    if (tarea) {
-                        console.log("\nTarea encontrada:");
-                        mostrarDetalle(tarea);
-                    } else {
-                        console.log("Tarea no encontrada");
-                    }
-                });
+                
+           crearTareaPorTeclado(tareas , ESTADOS, DIFICULTADES);
+
             break;
-
-
-
-
             case 4:
                 console.log("Saliendo...");
                 rl.close();
@@ -118,24 +184,7 @@ const bloqueTrabajo = function (tareas , ESTADOS, DIFICULTADES){
         };            
     });
 
-
-
-
-
-
-
-
-
-
-
 }
-
-
-
-
-
-
-
 
 
 
@@ -150,14 +199,10 @@ main = function (){
     2: "😬 Medio",
     3: "😡 Dificil"};
 
-
     bloqueTrabajo(tareas , ESTADOS, DIFICULTADES);
 
 
-
-
-
-
-
 }
+
+
 main();
