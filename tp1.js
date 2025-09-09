@@ -5,6 +5,13 @@ const rl = readline.createInterface({
   input: process.stdin,
   output: process.stdout
 });
+//Crea menu
+function menu(){
+    console.log("1. Crear tarea");
+    console.log("2. Cambiar estado de una tarea");
+    console.log("3. Buscar tarea");
+    console.log("4. Salir");
+}
 // Crear tarea
     function crearTarea(titulo, opciones = {}) {
         let ahora = new Date();
@@ -26,9 +33,9 @@ function crearTareaPorTeclado(callback) {
         // Pregunta la descripción
         rl.question('Descripción (opcional): ', function(descripcion) {
             // Pregunta el vencimiento
-            rl.question('Vencimiento (YYYY-MM-DD HH:MM, opcional): ', function(vencimientoStr) {
+            rl.question('Vencimiento (YYYY-MM-DD, opcional): ', function(vencimientoStr) {
                 // Pregunta la dificultad
-                rl.question('Dificultad (1: fácil, 2: medio, 3: difícil): ', function(dificultadStr) {
+                rl.question('Dificultad (1: fácil, 2: medio, 3: difícil)(opcional): ', function(dificultadStr) {
                     // Armamos el objeto opciones con los datos ingresados
                     let opciones = {};
                     opciones.descripcion = descripcion;
@@ -43,7 +50,14 @@ function crearTareaPorTeclado(callback) {
         });
     });
 }
-
+function buscarTarea(tareas, titulo) {
+    return tareas.find(tarea => tarea.titulo.toLowerCase() === titulo.toLowerCase());
+};
+function cambiarEstado(tarea, nuevoEstado) {
+    if (ESTADOS.includes(nuevoEstado)) {
+        tarea.estado = nuevoEstado;
+    }
+}
 function main() {
     let tareas = [];
     // Estados posibles
@@ -54,36 +68,53 @@ function main() {
         2: "😬 Medio",
         3: "😡 Difícil"
     };
+    menu();
+    rl.question("Ingrese una opcion: ", (opcion) =>{
+       opcion = parseInt(opcion);
 
-    
-    tareas.push(crearTarea('Título de la tarea', { descripcion: 'Texto de la descripción' }));
+       if (typeof opcion !== 'number'){
+        console.log("Opcion no valida");
+        main();
+       }
+
+        switch(opcion){
+            case 1:
+                
+            break;
+            case 2:
+                
+            break;
+            case 3:
+                rl.question("Ingrese el titulo de la tarea a buscar: ", (titulo) =>{
+                    let tarea = buscarTarea(tareas, titulo);    
+                    if (tarea) {
+                        console.log("\nTarea encontrada:");
+                        mostrarDetalle(tarea);
+                    } else {
+                        console.log("Tarea no encontrada");
+                    }
+                });
+            break;
+            case 4:
+                console.log("Saliendo...");
+                rl.close();
+            break;
+
+        };            
+    });
     // Cambiar estado de una tarea
-    function cambiarEstado(tarea, nuevoEstado) {
-        if (ESTADOS.includes(nuevoEstado)) {
-            tarea.estado = nuevoEstado;
-        }
-    }
+  
 
     // Mostrar detalle de una tarea
     function mostrarDetalle(tarea) {
         console.log('Título:', tarea.titulo);
-        if (tarea.descripcion) console.log('Descripción:', tarea.descripcion);
+        console.log('Descripción:', tarea.descripcion);
         console.log('Estado:', tarea.estado);
         console.log('Fecha de creación:', tarea.fechaCreacion.toLocaleString());
-        if (tarea.vencimiento) console.log('Vencimiento:', tarea.vencimiento.toLocaleString());
+        console.log('Vencimiento:', tarea.vencimiento.toLocaleString());
         console.log('Dificultad:', DIFICULTADES[tarea.dificultad] || DIFICULTADES[1]);
     }
 
-    // Ejemplo de uso
-    let t1 = crearTarea('Estudiar para el examen', {
-        descripcion: 'Repasar los temas de la unidad 2',
-        vencimiento: new Date('2025-09-10T23:59:00'),
-        dificultad: 2
-    });
-    let t2 = crearTarea('Comprar materiales');
-    cambiarEstado(t1, 'en curso');
-    mostrarDetalle(t1);
-    mostrarDetalle(t2);
     // Ejemplo de uso con entrada por teclado
     crearTareaPorTeclado(function(tarea) {
         // Aquí recibimos la tarea creada y la agregamos al arreglo
