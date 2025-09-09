@@ -145,7 +145,7 @@ main = function (){
     3: "😡 Dificil"};
 
 
-
+    bloqueTrabajo(tareas , ESTADOS, DIFICULTADES);
 
 
 

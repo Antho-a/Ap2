@@ -13,19 +13,29 @@ function menu(){
     console.log("4. Salir");
 }
 // Crear tarea
-    function crearTarea(titulo, opciones = {}) {
-        let ahora = new Date();
-        let tarea = {
-            titulo: titulo,
-            descripcion: opciones.descripcion || '',
-            estado: 'pendiente',
-            fechaCreacion: ahora,
-            vencimiento: opciones.vencimiento || null,
-            dificultad: opciones.dificultad || 1 // 1: fácil, 2: medio, 3: difícil
-        };
-        
-        return tarea;
-    }
+function crearTarea(titulo, opciones = {}) {
+    let ahora = new Date();
+    let tarea = {
+        titulo: titulo,
+        descripcion: opciones.descripcion || '',
+        estado: 'pendiente',
+        fechaCreacion: ahora,
+        vencimiento: opciones.vencimiento || null,
+        dificultad: opciones.dificultad || 1 // 1: fácil, 2: medio, 3: difícil
+    };
+    
+    return tarea;
+}
+
+ // Mostrar detalle de una tarea
+function mostrarDetalle(tarea) {
+    console.log('Título:', tarea.titulo);
+    console.log('Descripción:', tarea.descripcion);
+    console.log('Estado:', tarea.estado);
+    console.log('Fecha de creación:', tarea.fechaCreacion.toLocaleString());
+    console.log('Vencimiento:', tarea.vencimiento.toLocaleString());
+    console.log('Dificultad:', DIFICULTADES[tarea.dificultad] || DIFICULTADES[1]);
+}    
 // Esta función pide los datos de la tarea por teclado y usa un callback para "devolver" la tarea creada
 function crearTareaPorTeclado(callback) {
     // Pregunta el título
@@ -68,7 +78,10 @@ function main() {
         2: "😬 Medio",
         3: "😡 Difícil"
     };
+
+    
     menu();
+    
     rl.question("Ingrese una opcion: ", (opcion) =>{
        opcion = parseInt(opcion);
 
@@ -79,7 +92,11 @@ function main() {
 
         switch(opcion){
             case 1:
-                
+                crearTareaPorTeclado(function(tarea) {
+                // Aquí recibimos la tarea creada y la agregamos al arreglo
+                tareas.push(tarea);
+                console.log('\nTarea creada:');
+                });
             break;
             case 2:
                  rl.question("Ingrese el titulo de la tarea a buscar: ", (titulo) =>{
@@ -117,30 +134,7 @@ function main() {
             break;
 
         };            
-    });
-    // Cambiar estado de una tarea
-  
-
-    // Mostrar detalle de una tarea
-    function mostrarDetalle(tarea) {
-        console.log('Título:', tarea.titulo);
-        console.log('Descripción:', tarea.descripcion);
-        console.log('Estado:', tarea.estado);
-        console.log('Fecha de creación:', tarea.fechaCreacion.toLocaleString());
-        console.log('Vencimiento:', tarea.vencimiento.toLocaleString());
-        console.log('Dificultad:', DIFICULTADES[tarea.dificultad] || DIFICULTADES[1]);
-    }
-
-    // Ejemplo de uso con entrada por teclado
-    crearTareaPorTeclado(function(tarea) {
-        // Aquí recibimos la tarea creada y la agregamos al arreglo
-        tareas.push(tarea);
-        // Mostramos el detalle de la tarea
-        console.log('\nTarea creada:');
-        mostrarDetalle(tarea);
-        // Cerramos la interfaz de entrada
-        rl.close();
-    });
+    });   
 }
 
 main();
