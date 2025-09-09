@@ -58,7 +58,7 @@ function mostrarDetalle(tarea) {
 } 
 
 
-function crearTareaPorTeclado(titulo,tareas , ESTADOS, DIFICULTADES) {
+function crearTareaPorTeclado(tareas, ESTADOS, DIFICULTADES) {
     let tarea = {
         titulo: '',
         descripcion: '',
@@ -81,7 +81,9 @@ function crearTareaPorTeclado(titulo,tareas , ESTADOS, DIFICULTADES) {
             bloqueTrabajo(tareas , ESTADOS, DIFICULTADES);
             return;
         }
+
         tarea.titulo = titulo;
+
         rl.question('Descripción (opcional): ', (descripcion) => {
 
             if(descripcion.length > 501) {
@@ -89,9 +91,7 @@ function crearTareaPorTeclado(titulo,tareas , ESTADOS, DIFICULTADES) {
                 bloqueTrabajo(tareas , ESTADOS, DIFICULTADES);
                 return;
             }
-
             tarea.descripcion = descripcion;
-
             tareas.push(tarea);
             console.log("Tarea creada exitosamente.");
 
@@ -173,7 +173,7 @@ const bloqueTrabajo = function (tareas, ESTADOS, DIFICULTADES){
 
             case 3:
                 
-           crearTareaPorTeclado(tareas , ESTADOS, DIFICULTADES);
+           crearTareaPorTeclado(tareas, ESTADOS, DIFICULTADES);
 
             break;
             case 4:
