@@ -1,3 +1,4 @@
+const { escape } = require("querystring");
 const readline = require("readline");
 
 // Crear interfaz para leer y escribir en consola
@@ -22,19 +23,161 @@ function menuBuscar(){
     console.log("[6] Volver al menu principal");
 }
 
-function titulosTareas(tareas , estadoEligido) {
 
-    estados = ['todas', 'pendientes', 'en curso', 'terminadas', 'canceladas'];
+function editar (tarea ,tareas , ESTADOS , DIFICULTADES){
+    console.log(`ESTA EDITANDO LA TAREA ${tarea.titulo}\n`);
 
-    console.log("Tareas:");
-    tareas.forEach((tarea, index) => {
-        if(tareas.estado.toLowerCase() == estadoEligido  && estadoEligido != 'todas'){
-        console.log(`[${index + 1}]. ${tarea.titulo} - Estado: ${tarea.estado}`);
+    console.log("Que desea modificar ? \n\n");
+
+
+    console.log("[1] Descripcion ");
+    console.log("[2] Estado");
+    console.log("[3] Dificultad");
+    console.log("[4] Vencimiento");
+    console.log("[5] Volver al menu principal");
+    
+    rl.question("", (op)=>{
+
+        if(isNaN(op) || (op<0 || op>5) ){
+            console.log("Ha ingresado una opcion incorrecta \n\n")
+            editar(tarea , tareas , ESTADOS, DIFICULTADES);
         }
-        else if (estadoEligido == 'todas'){
-            console.log(`[${index + 1}]. ${tarea.titulo} - Estado: ${tarea.estado}`);
+
+        else{
+			op = parseInt(op);
+            switch(op){
+
+                case 1:
+                    rl.question("Ingrese la nueva descripcion de la tarea" , (NewDescrip) =>{
+
+                        NewDescrip.toLocaleString;
+
+                        tarea.descripcion = NewDescrip;
+
+                        console.log("Volviendo al menu principal");
+
+                        tarea.ultimaEdicion = new Date();
+
+                        bloqueTrabajo(tareas,ESTADOS,DIFICULTADES);
+                        
+                    });
+
+                    break;
+                
+                case 2 : 
+                    
+                    console.log(`los estados disponibles son` )
+                    for ( i = 0 ; ESTADOS[i] != undefined ; i++){
+
+                        console.log(`[${i+1}] ${ESTADOS[i]}`)
+
+                    }
+                    
+                    rl.question("Ingrese el nuevo estado de la tarea" , (newEstado) =>{
+
+
+
+                        if(isNaN(newEstado) || (newEstado < 0 || newEstado > 4) ){
+
+                            console.log("Volviendo al menu de edicion");
+
+                            editar(tarea, tareas , ESTADOS , DIFICULTADES);
+
+                        }
+
+                        tarea.estado = ESTADOS[newEstado-1];
+
+                        console.log("Volviendo al menu principal");
+
+                        tarea.ultimaEdicion = new Date();
+
+                        bloqueTrabajo(tareas,ESTADOS,DIFICULTADES);
+                        
+                    });
+                    break;
+                    case 3 :
+                    console.log(`Las dificultades posibles son:`);
+                    for (var key in DIFICULTADES) {
+                        if (DIFICULTADES.hasOwnProperty(key)) {
+                            console.log(`[${key}] ${DIFICULTADES[key]}`);
+                        }
+                    }
+
+
+                    rl.question("Elija la dificultad ", (newDificulty) => {
+
+                        if(isNaN(newDificulty) || (newDificulty < 0 || newDificulty > 3 ) ){
+
+                        console.log("Volviendo al menu de edicion");
+
+                        editar(tarea, tareas , ESTADOS , DIFICULTADES);
+
+                        }
+                        else{
+
+                            tarea.dificultad = DIFICULTADES[newDificulty];
+
+                            console.log("Volviendo al menu principal");
+
+                            tarea.ultimaEdicion = new Date();
+
+                            bloqueTrabajo(tareas,ESTADOS,DIFICULTADES);
+
+                        }
+
+                    });
+
+                break;
+                case 5:
+                    bloqueTrabajo(tareas,ESTADOS,DIFICULTADES);
+            }
         }
     });
+
+}
+
+
+
+function titulosTareas(tareas , estadoEligido, ESTADOS, DIFICULTADES) {
+   console.log(`\nTAREAS`);
+	for(let i=0; i < tareas.length; i++) {
+		let tarea = tareas[i];
+		if (tarea.estado.toLowerCase() == estadoEligido && estadoEligido != 'todas') {
+			console.log(`[${i + 1}]. ${tarea.titulo}`);
+		}
+	}
+	rl.question("ingrese el numero de la tarea para ver su detalle\n",(i)=>{
+		i = parseInt(i);
+		if (!isNaN(i) && i > 0 && i <= tareas.length) {
+			
+            mostrarDetalle(tareas[i - 1]);
+			let tarea = tareas[i - 1];
+
+	        rl.question("Ingrese E para editar una tarea o 0 para volver al menu principal\n", (input) => {
+		        if (input.toLowerCase() === 'e') {
+
+                    editar(tarea, tareas,ESTADOS,DIFICULTADES);
+			
+		        } else{
+			    bloqueTrabajo(tareas, ESTADOS, DIFICULTADES);
+		        }
+	        });
+ 
+		} else {
+			console.log("Número de tarea inválido. Volviendo al menu");
+            bloqueTrabajo(tareas, ESTADOS, DIFICULTADES);
+		}
+	});
+	
+}
+
+function mostrarDetalle(tarea, DIFICULTADES, ESTADOS) {
+    console.log('Título:', tarea.titulo);
+    console.log('Descripción:', tarea.descripcion);
+    console.log('Estado:', tarea.estado);
+    console.log('Fecha de creación:', tarea.fechaCreacion.toLocaleString());
+    console.log('Vencimiento:', tarea.vencimiento.toLocaleString());
+    console.log('Dificultad:', DIFICULTADES[tarea.dificultad] || DIFICULTADES[1]);
 }
 
 function buscarTarea(tareas, titulo) {
@@ -45,6 +188,8 @@ function buscarTarea(tareas, titulo) {
 function cambiarEstado(tarea, nuevoEstado) {
     if (ESTADOS.includes(nuevoEstado)) {
         tarea.estado = nuevoEstado;
+		console.log("Estado actualizado:");
+		bloqueTrabajo(tareas , ESTADOS, DIFICULTADES);
     }
 } 
 
@@ -54,7 +199,7 @@ function mostrarDetalle(tarea) {
     console.log('Estado:', tarea.estado);
     console.log('Fecha de creación:', tarea.fechaCreacion.toLocaleString());
     console.log('Vencimiento:', tarea.vencimiento.toLocaleString());
-    console.log('Dificultad:', DIFICULTADES[tarea.dificultad] || DIFICULTADES[1]);
+    console.log('Dificultad:', tarea.dificultad.toLocaleString());
 } 
 
 
@@ -64,7 +209,7 @@ function crearTareaPorTeclado(tareas, ESTADOS, DIFICULTADES) {
         descripcion: '',
         estado: 'pendiente',
         fechaCreacion: new Date(),
-        vencimiento: null,
+        vencimiento: "",
         dificultad: 1, // 1: fácil, 2: medio, 3: difícil
         ultimaEdicion: new Date(),
 
@@ -124,7 +269,7 @@ const bloqueTrabajo = function (tareas, ESTADOS, DIFICULTADES){
                 if(tareas.length === 0){
                     console.log("No hay tareas para mostrar.");
                     bloqueTrabajo(tareas , ESTADOS, DIFICULTADES);
-                    break;
+                    return;
                 }
 
                 menuBuscar();
@@ -132,13 +277,14 @@ const bloqueTrabajo = function (tareas, ESTADOS, DIFICULTADES){
                     if (isNaN(opcion)){
                         console.log("Opcion no valida");
                         bloqueTrabajo(tareas , ESTADOS, DIFICULTADES);
+						return;
                     }
                     opcion = parseInt(opcion);
                     if (opcion < 1 || opcion > 6){
                         console.log("Opcion no valida");
                         bloqueTrabajo(tareas , ESTADOS, DIFICULTADES);
                     }
-                    titulosTareas(tareas , estados[opcion - 1]);
+                    titulosTareas(tareas , ESTADOS[opcion - 1], ESTADOS, DIFICULTADES);
                 });
                         
             break;
@@ -166,6 +312,8 @@ const bloqueTrabajo = function (tareas, ESTADOS, DIFICULTADES){
                             }});
                     } else {
                         console.log("Tarea no encontrada");
+						bloqueTrabajo(tareas , ESTADOS, DIFICULTADES);
+
                     }
                 });
 
