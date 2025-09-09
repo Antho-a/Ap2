@@ -82,6 +82,22 @@ function main() {
                 
             break;
             case 2:
+                 rl.question("Ingrese el titulo de la tarea a buscar: ", (titulo) =>{
+                    let tarea = buscarTarea(tareas, titulo);    
+                    if (tarea) {
+                        console.log("\nTarea encontrada:");
+                        rl.question("Ingrese el nuevo estado (pendiente, en curso, terminada, cancelada): ", (nuevoEstado) => {
+                            if (ESTADOS.includes(nuevoEstado)) {
+                                cambiarEstado(tarea, nuevoEstado);
+                                console.log("Estado actualizado:");
+                                mostrarDetalle(tarea);
+                            }else{
+                                console.log("Estado no válido. No se realizaron cambios.");
+                            }});
+                    } else {
+                        console.log("Tarea no encontrada");
+                    }
+                });
                 
             break;
             case 3:
