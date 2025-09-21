@@ -38,7 +38,7 @@ function editar (tarea ,tareas , ESTADOS , DIFICULTADES){
     
     rl.question("", (op)=>{
 
-        if(isNaN(op) || (op<0 || op>5) ){
+        if(isNaN(op) || (op<1 || op>5) ){
             console.log("Ha ingresado una opcion incorrecta \n\n")
             editar(tarea , tareas , ESTADOS, DIFICULTADES);
         }
@@ -128,6 +128,21 @@ function editar (tarea ,tareas , ESTADOS , DIFICULTADES){
                     });
 
                 break;
+                case 4:
+                    rl.question("Ingrese la nueva fecha de vencimiento (formato: AAAA-MM-DD) ", (newDate) => {
+
+                        let fecha = new Date(newDate);
+                        if (isNaN(fecha.getTime())) {
+                            console.log("Fecha no válida. Volviendo al menú de edición.");
+                            editar(tarea, tareas, ESTADOS, DIFICULTADES);
+                            return;
+                        }   
+                        tarea.vencimiento = fecha;
+                        console.log("Fecha de vencimiento actualizada.");
+                        tarea.ultimaEdicion = new Date();
+                        bloqueTrabajo(tareas, ESTADOS, DIFICULTADES);
+                    });
+                break;
                 case 5:
                     bloqueTrabajo(tareas,ESTADOS,DIFICULTADES);
             }
@@ -140,18 +155,24 @@ function editar (tarea ,tareas , ESTADOS , DIFICULTADES){
 
 function titulosTareas(tareas , estadoEligido, ESTADOS, DIFICULTADES) {
    console.log(`\nTAREAS`);
+   let tarea;
+   let a=0;
 	for(let i=0; i < tareas.length; i++) {
-		let tarea = tareas[i];
-		if (tarea.estado.toLowerCase() == estadoEligido && estadoEligido != 'todas') {
+        tarea = tareas[i];
+		if (tarea.estado.toLowerCase() == estadoEligido) {
 			console.log(`[${i + 1}]. ${tarea.titulo}`);
-		}
+            a++;
+		}else if (estadoEligido == 'todas'){
+            console.log(`[${i + 1}]. ${tarea.titulo}`);
+            a++;
+        }
 	}
-	rl.question("ingrese el numero de la tarea para ver su detalle\n",(i)=>{
-		i = parseInt(i);
-		if (!isNaN(i) && i > 0 && i <= tareas.length) {
+    if(a!=0){
+        rl.question("ingrese el nombre de la tarea para ver su detalle\n",(i)=>{
+		tarea=buscarTarea(tareas, i)
+		if (tarea) {
 			
-            mostrarDetalle(tareas[i - 1]);
-			let tarea = tareas[i - 1];
+            mostrarDetalle(tarea, DIFICULTADES);
 
 	        rl.question("Ingrese E para editar una tarea o 0 para volver al menu principal\n", (input) => {
 		        if (input.toLowerCase() === 'e') {
@@ -164,20 +185,25 @@ function titulosTareas(tareas , estadoEligido, ESTADOS, DIFICULTADES) {
 	        });
  
 		} else {
-			console.log("Número de tarea inválido. Volviendo al menu");
+			console.log("Dato de tarea inválido. Volviendo al menu");
             bloqueTrabajo(tareas, ESTADOS, DIFICULTADES);
 		}
 	});
+    }else{
+        console.log("No hay tareas de ese estado para mostrar");
+        bloqueTrabajo(tareas, ESTADOS, DIFICULTADES);
+    }
+	
 	
 }
 
-function mostrarDetalle(tarea, DIFICULTADES, ESTADOS) {
+function mostrarDetalle(tarea, DIFICULTADES) {
     console.log('Título:', tarea.titulo);
     console.log('Descripción:', tarea.descripcion);
     console.log('Estado:', tarea.estado);
     console.log('Fecha de creación:', tarea.fechaCreacion.toLocaleString());
-    console.log('Vencimiento:', tarea.vencimiento.toLocaleString());
-    console.log('Dificultad:', DIFICULTADES[tarea.dificultad] || DIFICULTADES[1]);
+    console.log('Vencimiento:', tarea.vencimiento.toLocaleString() || "No establecido");
+    console.log('Dificultad:', DIFICULTADES[tarea.dificultad]|| DIFICULTADES[1]);
 }
 
 function buscarTarea(tareas, titulo) {
@@ -186,21 +212,14 @@ function buscarTarea(tareas, titulo) {
 
 
 function cambiarEstado(tarea, nuevoEstado) {
-    if (ESTADOS.includes(nuevoEstado)) {
+   
         tarea.estado = nuevoEstado;
 		console.log("Estado actualizado:");
-		bloqueTrabajo(tareas , ESTADOS, DIFICULTADES);
-    }
+		
+
 } 
 
-function mostrarDetalle(tarea) {
-    console.log('Título:', tarea.titulo);
-    console.log('Descripción:', tarea.descripcion);
-    console.log('Estado:', tarea.estado);
-    console.log('Fecha de creación:', tarea.fechaCreacion.toLocaleString());
-    console.log('Vencimiento:', tarea.vencimiento.toLocaleString());
-    console.log('Dificultad:', tarea.dificultad.toLocaleString());
-} 
+
 
 
 function crearTareaPorTeclado(tareas, ESTADOS, DIFICULTADES) {
@@ -282,9 +301,15 @@ const bloqueTrabajo = function (tareas, ESTADOS, DIFICULTADES){
                     opcion = parseInt(opcion);
                     if (opcion < 1 || opcion > 6){
                         console.log("Opcion no valida");
-                        bloqueTrabajo(tareas , ESTADOS, DIFICULTADES);
+                        bloqueTrabajo(tareas , ESTADOS, DIFICULTADES);    
                     }
-                    titulosTareas(tareas , ESTADOS[opcion - 1], ESTADOS, DIFICULTADES);
+                    if(opcion == 1){
+                            titulosTareas(tareas , "todas", ESTADOS, DIFICULTADES);
+                    }
+                    else{
+                        titulosTareas(tareas , ESTADOS[opcion - 2], ESTADOS, DIFICULTADES);
+                    }
+                    
                 });
                         
             break;
@@ -305,16 +330,18 @@ const bloqueTrabajo = function (tareas, ESTADOS, DIFICULTADES){
                         rl.question("Ingrese el nuevo estado (pendiente, en curso, terminada, cancelada): ", (nuevoEstado) => {
                             if (ESTADOS.includes(nuevoEstado)) {
                                 cambiarEstado(tarea, nuevoEstado);
-                                console.log("Estado actualizado:");
-                                mostrarDetalle(tarea);
+                                mostrarDetalle(tarea,DIFICULTADES);
+                                bloqueTrabajo(tareas , ESTADOS, DIFICULTADES);
                             }else{
                                 console.log("Estado no válido. No se realizaron cambios.");
+                                bloqueTrabajo(tareas , ESTADOS, DIFICULTADES);
                             }});
                     } else {
                         console.log("Tarea no encontrada");
 						bloqueTrabajo(tareas , ESTADOS, DIFICULTADES);
 
                     }
+                    
                 });
 
             break;
